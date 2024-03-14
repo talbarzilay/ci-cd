@@ -6,15 +6,22 @@ node {
      commit_id = readFile('.git/commit-id').trim()
    }
    stage('DockerBuild') {
-       dir("docker/day_2/12factor/multistage_build/"){
-       sh "docker build --target builder -t <registry/repository>:multi_stage_builder -f Dockerfile-pipelines ."
-       }
+      dir("docker/day_2/12factor/multistage_build/"){
+       sh "docker build --target builder -t michabi/jenkins_lab:multi_stage_builder-${commit_id} -f Dockerfile-pipelines ."
+      }
      }
    stage('Linting') {
-       dir("docker/day_2/12factor/multistage_build/"){
-       sh "docker build --target linting -t <registry/repository>:multi_stage_test -f Dockerfile-pipelines ."
-       }
-    }
+      dir("docker/day_2/12factor/multistage_build/"){
+       sh "docker build --target linting -t michabi/jenkins_lab:multi_stage_test-${commit_id} -f Dockerfile-pipelines ."
+      }
+     }
+    stage('Push') {
+      withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+          sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+          sh "docker push michabi/jenkins_lab:multi_stage_builder-${commit_id}"
+          sh "docker push michabi/jenkins_lab:multi_stage_test-${commit_id}"
+      }
+    }   
 }
    
    

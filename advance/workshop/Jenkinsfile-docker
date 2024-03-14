@@ -1,0 +1,35 @@
+node {
+  def commit_id
+   stage('Checkout') {
+     checkout scm
+     sh "git rev-parse --short HEAD > .git/commit-id"
+     commit_id = readFile('.git/commit-id').trim()
+     def image_tag = "michabi/jenkins-lab:${commit_id}"
+   }
+   stage('Build') {
+       dir("advance/workshop/talkshow"){
+         sh "docker build -t ${image_tag} --build-arg  USERNAME=admin --build-arg PASSWORD=admin123 -f Dockerfile ."
+       }
+    }
+    stage('Push') {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+            sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+            sh "docker push ${image_tag}"
+        }
+    }
+   stage('test') {
+       dir("advance/workshop/talkshow"){
+        sh """
+        docker build -t ${image_tag}-test --build-arg  USERNAME=admin --build-arg PASSWORD=admin123 -f Dockerfile . -target=pytest
+        docker run -it --rm --name workshop-testing ${image_tag} pytest -v --cov-config .coveragerc --cov=talkshow -l --tb=short --maxfail=1 tests/
+        """
+       }
+    }
+   stage('Serve') {
+    dir("advance/workshop/talkshow"){
+        sh """
+            docker run -it --rm --name workshop-testing ${image_tag} -p 5002:5002
+        """
+        }
+    }
+}
