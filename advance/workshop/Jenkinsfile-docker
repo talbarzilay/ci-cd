@@ -1,6 +1,7 @@
 node {
   def commit_id
    stage('Checkout') {
+     // using shared library scmCheckout = scmCheckout(branch: 'resolved_tasks', url: 'https://github.com/michabi/docker-ci-cd-mb.git')
      checkout scm
      sh "git rev-parse --short HEAD > .git/commit-id"
      commit_id = readFile('.git/commit-id').trim()
