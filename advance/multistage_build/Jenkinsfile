@@ -17,8 +17,7 @@ node {
     }
   stage('push') {
     dir("docker/day_2/12factor/multistage_build/"){
-
-      ithCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')])
+      withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
         sh "docker login docker login -u ${USERNAME} -p ${PASSWORD}"
         sh "docker push talbarzilay/jenkins-multi:multi_stage_builder"
         sh "docker push talbarzilay/jenkins-multi:multi_stage_test"
