@@ -5,18 +5,20 @@ node {
      sh "git rev-parse --short HEAD > .git/commit-id"                        
      commit_id = readFile('.git/commit-id').trim()
    }
-   stage('DockerBuild') {
-       dir("advence/multistage_build/"){
+    stage('DockerBuild') {
+    dir("advance/multistage_build/"){
        sh "docker build --target builder -t talbarzilay/jenkins-multi:multi_stage_builder -f Dockerfile-pipelines ."
        }
      }
-   stage('Linting') {
-       dir("advence/multistage_build/"){
-       sh "docker build --target linting -t talbarzilay/jenkins-multi:multi_stage_test -f Dockerfile-pipelines ."
-       }
+    stage('Linting') {
+    ir("advance/multistage_build/"){
+      sh "docker build --target linting -t talbarzilay/jenkins-multi:multi_stage_test -f Dockerfile-pipelines ."
     }
+    }
+
+    
   stage('push') {
-    dir("advence/multistage_build/"){
+    dir("advance/multistage_build/"){
       withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
         sh "docker login docker login -u ${USERNAME} -p ${PASSWORD}"
         sh "docker push talbarzilay/jenkins-multi:multi_stage_builder"
