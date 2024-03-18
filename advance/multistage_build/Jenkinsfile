@@ -1,22 +1,24 @@
 node {
-   def commit_id
-   stage('step a') {
-     checkout scm
-     sh "git rev-parse --short HEAD > .git/commit-id"                        
-     commit_id = readFile('.git/commit-id').trim()
-   }
-    stage('DockerBuild') {
+  def commit_id
+  
+  stage('step a') {
+    checkout scm
+    sh "git rev-parse --short HEAD > .git/commit-id"                        
+     ommit_id = readFile('.git/commit-id').trim()
+  }
+  
+  stage('DockerBuild') {
     dir("advance/multistage_build/"){
-       sh "docker build --target builder -t talbarzilay/jenkins-multi:multi_stage_builder -f Dockerfile-pipelines ."
-       }
-     }
-    stage('Linting') {
-    ir("advance/multistage_build/"){
+      sh "docker build --target builder -t talbarzilay/jenkins-multi:multi_stage_builder -f Dockerfile-pipelines ."
+    }
+  }
+    
+  stage('Linting') {
+    dir("advance/multistage_build/"){
       sh "docker build --target linting -t talbarzilay/jenkins-multi:multi_stage_test -f Dockerfile-pipelines ."
     }
-    }
+  }
 
-    
   stage('push') {
     dir("advance/multistage_build/"){
       withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
