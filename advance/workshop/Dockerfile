@@ -1,1 +1,26 @@
-RlJPTSBweXRob246My4xMCBhcyBidWlsZGVyCgpXT1JLRElSIC9hcHAKCkFSRyBVU0VSTkFNRQpBUkcgUEFTU1dPUkQKQ09QWSAuIC9hcHAvCgpSVU4gcGlwIGluc3RhbGwgLWUgJy5bZGV2XScgJiYgcGlwIGluc3RhbGwgZW1haWxfdmFsaWRhdG9yCgpSVU4gZmxhc2sgYWRkdXNlciAtdSAkVVNFUk5BTUUgLXAgJFBBU1NXT1JEClJVTiBmbGFzayBhZGRldmVudCAtbiAiRmxhc2sgQ29uZiIgLWQgIjIwMTgtMDgtMjUiCgpGUk9NIHFuaWIvcHl0ZXN0IGFzIHB5dGVzdAoKV09SS0RJUiAvdGVzdApDT1BZIC0tZnJvbT1idWlsZGVyIC9hcHAgL3Rlc3QKUlVOIHB5dGVzdCAtdiAtLWNvdi1jb25maWcgLmNvdmVyYWdlcmMgLS1jb3Y9dGFsa3Nob3cgLWwgLS10Yj1zaG9ydCAtLW1heGZhaWw9MSB0ZXN0cy8KCkZST00gYnVpbGRlciBhcyBmaW5hbAoKQ01EIFsiZmxhc2siLCAicnVuIl0=
+FROM python:3.10-slim as builder
+
+WORKDIR /app
+
+COPY setup.py setup.py 
+RUN pip install -e '.[dev]'
+
+COPY talkshow talkshow
+COPY settings.toml settings.toml
+COPY .env .env
+RUN flask adduser -u admin -p 1234
+RUN flask addevent -n "Flask Conf" -d "2018-08-25"
+
+
+
+
+FROM qnib/pytest as tester
+WORKDIR /app
+COPY --from=builder /app /app
+COPY /tests /tests
+#RUN py.test -v --cov-config .coveragerc --cov=talkshow -l --tb=short --maxfail=1 /tests/
+
+
+
+FROM builder as final
+CMD flask run

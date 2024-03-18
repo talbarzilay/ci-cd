@@ -1,11 +1,10 @@
 node {
-
   stage('DockerBuild') {
     dir("advance/multistage_build/"){
       sh "docker build --target builder -t talbarzilay/jenkins-multi:multi_stage_builder -f Dockerfile-pipelines ."
     }
-  }
-    
+  } 
+     
   stage('Linting') {
     dir("advance/multistage_build/"){
       sh "docker build --target linting -t talbarzilay/jenkins-multi:multi_stage_test -f Dockerfile-pipelines ."
@@ -14,7 +13,7 @@ node {
 
   stage('push') {
     dir("advance/multistage_build/"){
-      withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+      withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD', )]) {
         sh "docker login -u ${USERNAME} -p ${PASSWORD}"
         sh "docker push talbarzilay/jenkins-multi:multi_stage_builder"
         sh "docker push talbarzilay/jenkins-multi:multi_stage_test"
