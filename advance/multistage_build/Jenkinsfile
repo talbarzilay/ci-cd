@@ -7,14 +7,24 @@ node {
    }
    stage('DockerBuild') {
        dir("docker/day_2/12factor/multistage_build/"){
-       sh "docker build --target builder -t <registry/repository>:multi_stage_builder -f Dockerfile-pipelines ."
+       sh "docker build --target builder -t talbarzilay/jenkins-multi:multi_stage_builder -f Dockerfile-pipelines ."
        }
      }
    stage('Linting') {
        dir("docker/day_2/12factor/multistage_build/"){
-       sh "docker build --target linting -t <registry/repository>:multi_stage_test -f Dockerfile-pipelines ."
+       sh "docker build --target linting -t talbarzilay/jenkins-multi:multi_stage_test -f Dockerfile-pipelines ."
        }
     }
+  stage('push') {
+    dir("docker/day_2/12factor/multistage_build/"){
+
+      ithCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')])
+        sh "docker login docker login -u ${USERNAME} -p ${PASSWORD}"
+        sh "docker push talbarzilay/jenkins-multi:multi_stage_builder"
+        sh "docker push talbarzilay/jenkins-multi:multi_stage_test"
+      }
+    }
+  }
 }
    
    

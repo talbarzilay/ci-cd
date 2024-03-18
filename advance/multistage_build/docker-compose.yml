@@ -7,7 +7,18 @@ services:
       ports:
         - 0.0.0.0:9000:9000
         - 0.0.0.0:9092:9092
-      networks:
-       - nexus
-networks:
-  nexus:
+      # networks:
+      #  - nexus
+
+  my_app:
+    build: 
+      context: .
+      dockerfile: Dockerfile-pipelines
+    # networks:
+    #    - nexus
+    depends_on:
+      - sonarqube
+
+
+# networks:
+#   nexus:
