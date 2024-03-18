@@ -1,6 +1,6 @@
 node {
   def commit_id
-  
+
   stage('step a') {
     checkout scm
     sh "git rev-parse --short HEAD > .git/commit-id"                        
@@ -22,7 +22,7 @@ node {
   stage('push') {
     dir("advance/multistage_build/"){
       withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-        sh "docker login docker login -u ${USERNAME} -p ${PASSWORD}"
+        sh "docker login -u ${USERNAME} -p ${PASSWORD}"
         sh "docker push talbarzilay/jenkins-multi:multi_stage_builder"
         sh "docker push talbarzilay/jenkins-multi:multi_stage_test"
       }
